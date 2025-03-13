@@ -3,14 +3,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Label, Prisma } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
+import { CreateLabelDto } from './dto/create-label.dto';
+import { UpdateLabelDto } from './dto/update-label.dto';
+import { Label } from './entities/label.entity';
 
 @Injectable()
 export class LabelsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createLabelDto: Prisma.LabelCreateInput): Promise<Label> {
+  async create(createLabelDto: CreateLabelDto): Promise<Label> {
     try {
       return await this.prisma.label.create({
         data: createLabelDto,
@@ -35,10 +37,7 @@ export class LabelsService {
     return label;
   }
 
-  async update(
-    id: number,
-    updateLabelDto: Prisma.LabelUpdateInput,
-  ): Promise<Label> {
+  async update(id: number, updateLabelDto: UpdateLabelDto): Promise<Label> {
     try {
       return await this.prisma.label.update({
         where: { id },
