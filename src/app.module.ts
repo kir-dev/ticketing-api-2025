@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { TicketsModule } from './tickets/tickets.module';
 import { PrismaModule } from 'nestjs-prisma';
 import { BoardsModule } from './boards/boards.module';
+import { LabelsModule } from './labels/labels.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { BoardsModule } from './boards/boards.module';
       isGlobal: true,
     }),
     BoardsModule,
+    LabelsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
