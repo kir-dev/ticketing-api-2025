@@ -1,14 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { TicketsService } from './tickets.service';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
 
 @Controller('tickets')
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Post()
-  create(@Body() createTicketDto: CreateTicketDto) {
+  create(@Body() createTicketDto: Prisma.TicketUncheckedCreateInput) {
     return this.ticketsService.create(createTicketDto);
   }
 
@@ -18,17 +26,36 @@ export class TicketsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ticketsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.ticketsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-    return this.ticketsService.update(+id, updateTicketDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTicketDto: Prisma.TicketUncheckedUpdateInput,
+  ) {
+    return this.ticketsService.update(id, updateTicketDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ticketsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.ticketsService.remove(id);
+  }
+
+  @Patch(':ticketId/assign/:labelId')
+  assignLabel(
+    @Param('ticketId', ParseIntPipe) ticketId: number,
+    @Param('labelId', ParseIntPipe) labelId: number,
+  ) {
+    return this.ticketsService.assignLabel(ticketId, labelId);
+  }
+
+  @Delete(':ticketId/assign/:labelId')
+  removeLabel(
+    @Param('ticketId', ParseIntPipe) ticketId: number,
+    @Param('labelId', ParseIntPipe) labelId: number,
+  ) {
+    return this.ticketsService.removeLabel(ticketId, labelId);
   }
 }
