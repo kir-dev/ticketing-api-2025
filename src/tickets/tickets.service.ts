@@ -24,12 +24,23 @@ export class TicketsService {
   }
 
   async findAll(): Promise<Ticket[]> {
-    return await this.prisma.ticket.findMany();
+    return await this.prisma.ticket.findMany({
+      include: {
+        labels: {
+          select: { id: true, name: true, color: true },
+        },
+      },
+    });
   }
 
   async findOne(id: number): Promise<Ticket> {
     const ticket = await this.prisma.ticket.findUnique({
       where: { id },
+      include: {
+        labels: {
+          select: { id: true, name: true, color: true },
+        },
+      },
     });
     if (!ticket) {
       throw new NotFoundException('Could not find ticket');
@@ -61,5 +72,27 @@ export class TicketsService {
       console.error(e);
       throw new BadRequestException(`Could not delete ticket with id ${id}`);
     }
+  }
+
+  async addLabel(ticketId: number, labelId: number): Promise<Ticket> {
+    return await this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: {
+        labels: {
+          connect: { id: labelId },
+        },
+      },
+    });
+  }
+
+  async removeLabel(ticketId: number, labelId: number): Promise<Ticket> {
+    return await this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: {
+        labels: {
+          disconnect: { id: labelId },
+        },
+      },
+    });
   }
 }
