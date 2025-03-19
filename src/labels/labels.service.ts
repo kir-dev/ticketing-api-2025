@@ -1,33 +1,66 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
+import { Label } from './entities/label.entity';
 
 @Injectable()
 export class LabelsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createLabelDto: Prisma.LabelCreateInput) {
-    return await this.prisma.label.create({
-      data: createLabelDto,
-    });
+  async create(createLabelDto: Prisma.LabelCreateInput): Promise<Label> {
+    try {
+      return await this.prisma.label.create({
+        data: createLabelDto,
+      });
+    } catch (e) {
+      console.error(e);
+      throw new BadRequestException('Could not create label');
+    }
   }
 
-  findAll() {
-    return this.prisma.label.findMany();
+  async findAll(): Promise<Label[]> {
+    return await this.prisma.label.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} label`;
-  }
-
-  async update(id: number, updateLabelDto: Prisma.LabelUpdateInput) {
-    return await this.prisma.label.update({
+  async findOne(id: number): Promise<Label> {
+    const label = await this.prisma.label.findUnique({
       where: { id },
-      data: updateLabelDto,
     });
+
+    if (!label) {
+      throw new NotFoundException(`Label with id ${id} not found`);
+    }
+
+    return label;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} label`;
+  async update(
+    id: number,
+    updateLabelDto: Prisma.LabelUpdateInput,
+  ): Promise<Label> {
+    try {
+      return await this.prisma.label.update({
+        where: { id },
+        data: updateLabelDto,
+      });
+    } catch (e) {
+      console.error(e);
+      throw new BadRequestException(`Could not update label with id ${id}`);
+    }
+  }
+
+  async remove(id: number): Promise<Label> {
+    try {
+      return await this.prisma.label.delete({
+        where: { id },
+      });
+    } catch (e) {
+      console.error(e);
+      throw new BadRequestException('Could not create label');
+    }
   }
 }

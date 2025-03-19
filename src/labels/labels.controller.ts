@@ -4,10 +4,13 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { CreateLabelDto } from './dto/create-label.dto';
+import { UpdateLabelDto } from './dto/update-label.dto';
+import { Label } from './entities/label.entity';
 import { LabelsService } from './labels.service';
 
 @Controller('labels')
@@ -15,30 +18,30 @@ export class LabelsController {
   constructor(private readonly labelsService: LabelsService) {}
 
   @Post()
-  create(@Body() createLabelDto: Prisma.LabelCreateInput) {
+  create(@Body() createLabelDto: CreateLabelDto): Promise<Label> {
     return this.labelsService.create(createLabelDto);
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<Label[]> {
     return this.labelsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.labelsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Label> {
+    return this.labelsService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
-    @Body() updateLabelDto: Prisma.LabelUpdateInput,
-  ) {
-    return this.labelsService.update(+id, updateLabelDto);
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateLabelDto: UpdateLabelDto,
+  ): Promise<Label> {
+    return this.labelsService.update(id, updateLabelDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.labelsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number): Promise<Label> {
+    return this.labelsService.remove(id);
   }
 }

@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
+import { apiReference } from '@scalar/nestjs-api-reference';
 import metadata from './metadata';
 
 async function bootstrap() {
@@ -19,6 +20,13 @@ async function bootstrap() {
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
+
+  app.use(
+    '/scalar',
+    apiReference({
+      content: documentFactory,
+    }),
+  );
 
   const port = process.env.PORT ?? 3000;
   console.log(`Nestjs is running on port ${port}`);
