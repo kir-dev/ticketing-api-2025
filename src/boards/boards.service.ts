@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Boards, Prisma } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
+import { BoardWithTickets } from './entities/board-with-tickets.entity';
 
 @Injectable()
 export class BoardsService {
@@ -25,9 +26,10 @@ export class BoardsService {
     return await this.prisma.boards.findMany();
   }
 
-  async findOne(id: number): Promise<Boards> {
+  async findOne(id: number): Promise<BoardWithTickets> {
     const board = await this.prisma.boards.findUnique({
       where: { id },
+      include: { tickets: true },
     });
 
     if (!board) {
@@ -47,6 +49,11 @@ export class BoardsService {
         data: updateBoardDto,
       });
     } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new NotFoundException(`Board with id ${id} not found`);
+        }
+      }
       console.error(e);
       throw new BadRequestException(`Could not update board with id ${id}`);
     }
@@ -58,6 +65,11 @@ export class BoardsService {
         where: { id },
       });
     } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new NotFoundException(`Board with id ${id} not found`);
+        }
+      }
       console.error(e);
       throw new BadRequestException(`Could not delete board with id ${id}`);
     }

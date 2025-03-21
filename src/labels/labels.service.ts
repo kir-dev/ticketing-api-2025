@@ -48,6 +48,11 @@ export class LabelsService {
         data: updateLabelDto,
       });
     } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new NotFoundException(`Label with id ${id} not found`);
+        }
+      }
       console.error(e);
       throw new BadRequestException(`Could not update label with id ${id}`);
     }
@@ -59,6 +64,11 @@ export class LabelsService {
         where: { id },
       });
     } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new NotFoundException(`Label with id ${id} not found`);
+        }
+      }
       console.error(e);
       throw new BadRequestException('Could not create label');
     }

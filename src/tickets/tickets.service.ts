@@ -17,6 +17,13 @@ export class TicketsService {
         data: createTicketDto,
       });
     } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2003') {
+          throw new NotFoundException(
+            `Board with id ${createTicketDto.boardsId} not found`,
+          );
+        }
+      }
       console.error(e);
       throw new BadRequestException('Could not create ticket');
     }
@@ -52,8 +59,13 @@ export class TicketsService {
         data: updateTicketDto,
       });
     } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new NotFoundException(`Ticket with id ${id} not found`);
+        }
+      }
       console.error(e);
-      throw new BadRequestException(`Could not create ticket with id ${id}`);
+      throw new BadRequestException(`Could not update ticket with id ${id}`);
     }
   }
 
@@ -63,6 +75,11 @@ export class TicketsService {
         where: { id },
       });
     } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new NotFoundException(`Ticket with id ${id} not found`);
+        }
+      }
       console.error(e);
       throw new BadRequestException(`Could not delete ticket with id ${id}`);
     }
@@ -87,7 +104,12 @@ export class TicketsService {
     } catch (e) {
       console.error(e);
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        throw new BadRequestException(e.message);
+        if (e.code === 'P2025') {
+          throw new NotFoundException('Invalid label id');
+        }
+        if (e.code === 'P2016') {
+          throw new NotFoundException('Invalid ticket id');
+        }
       }
       throw new BadRequestException(`Could not assign label to ticket`);
     }
@@ -112,7 +134,9 @@ export class TicketsService {
     } catch (e) {
       console.error(e);
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        throw new BadRequestException(e.message);
+        if (e.code === 'P2025') {
+          throw new NotFoundException('Invalid label id');
+        }
       }
       throw new BadRequestException(`Could not remove label from ticket`);
     }
